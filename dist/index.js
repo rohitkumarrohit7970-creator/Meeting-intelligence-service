@@ -1,21 +1,32 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import { requestTraceMiddleware, loggingMiddleware, unifiedResponseMiddleware } from './middleware/requestHandler.js';
 import { globalErrorHandler } from './middleware/errorHandler.js';
 import logger from './utils/logger.js';
 import authRoutes from './routes/authRoutes.js';
 import meetingRoutes from './routes/meetingRoutes.js';
 import actionItemRoutes from './routes/actionItemRoutes.js';
-dotenv.config();
+import { initScheduler } from './services/schedulerService.js';
+import swaggerUi from 'swagger-ui-express';
+import { specs } from './config/swagger.js';
 const app = express();
 const port = process.env.PORT || 3000;
+// Initialize Scheduler
+initScheduler();
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(requestTraceMiddleware);
 app.use(loggingMiddleware);
 app.use(unifiedResponseMiddleware);
+// Swagger Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+// Root route - redirect to API docs
+app.get('/', (req, res) => {
+    res.redirect('/api-docs');
+});
 // Health check
 app.get('/health', (req, res) => {
     res.json({ status: 'UP' });

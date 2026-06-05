@@ -1,10 +1,15 @@
 import { Groq } from 'groq-sdk';
 import prisma from '../config/prisma.js';
 import { AppError } from '../middleware/errorHandler.js';
-const groq = new Groq({
-    apiKey: process.env.GROQ_API_KEY,
-});
+const getGroqClient = () => {
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) {
+        throw new AppError(503, 'AI_SERVICE_NOT_CONFIGURED', 'AI analysis is not configured');
+    }
+    return new Groq({ apiKey });
+};
 export const analyzeMeeting = async (meetingId, userId) => {
+    const groq = getGroqClient();
     const meeting = await prisma.meeting.findFirst({
         where: { id: meetingId, userId },
         include: { transcripts: true },

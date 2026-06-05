@@ -1,7 +1,16 @@
-import { v4 as uuidv4 } from 'uuid';
+import * as crypto from 'node:crypto';
 import logger from '../utils/logger.js';
 export const requestTraceMiddleware = (req, res, next) => {
-    const traceId = req.headers['x-trace-id'] || uuidv4();
+    // Use crypto.randomUUID if available, otherwise fallback to a timestamp-based ID
+    let traceId = req.headers['x-trace-id'];
+    if (!traceId) {
+        try {
+            traceId = crypto.randomUUID();
+        }
+        catch (e) {
+            traceId = `trace-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+        }
+    }
     req.traceId = traceId;
     res.setHeader('x-trace-id', traceId);
     next();

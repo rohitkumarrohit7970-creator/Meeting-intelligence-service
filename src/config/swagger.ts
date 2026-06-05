@@ -1,4 +1,11 @@
+import { existsSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import swaggerJsdoc from 'swagger-jsdoc';
+
+const currentDir = dirname(fileURLToPath(import.meta.url));
+const hasBuiltRoutes = existsSync(join(currentDir, '../routes/authRoutes.js'));
+const routeGlob = hasBuiltRoutes ? join(currentDir, '../routes/*.js') : join(currentDir, '../routes/*.ts');
 
 const options: swaggerJsdoc.Options = {
   definition: {
@@ -10,8 +17,8 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: 'http://localhost:3000',
-        description: 'Development server',
+        url: '/',
+        description: hasBuiltRoutes ? 'Production server' : 'Development server',
       },
     ],
     components: {
@@ -29,7 +36,7 @@ const options: swaggerJsdoc.Options = {
       },
     ],
   },
-  apis: ['./src/routes/*.ts', './src/index.ts'], // Path to the API docs
+  apis: [routeGlob], // Path to the API docs
 };
 
 export const specs = swaggerJsdoc(options);
