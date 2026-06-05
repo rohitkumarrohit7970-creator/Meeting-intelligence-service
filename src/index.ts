@@ -29,6 +29,11 @@ app.use(unifiedResponseMiddleware);
 // Swagger Documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
+// Root route - redirect to API docs
+app.get('/', (req, res) => {
+  res.redirect('/api-docs');
+});
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'UP' });
