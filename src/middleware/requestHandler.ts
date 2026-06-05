@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { randomUUID } from 'node:crypto';
+import crypto from 'node:crypto';
 import logger from '../utils/logger.js';
 
 export interface ExtendedRequest extends Request {
@@ -7,7 +7,7 @@ export interface ExtendedRequest extends Request {
 }
 
 export const requestTraceMiddleware = (req: ExtendedRequest, res: Response, next: NextFunction) => {
-  const traceId = (req.headers['x-trace-id'] as string) || randomUUID();
+  const traceId = (req.headers['x-trace-id'] as string) || crypto.randomUUID();
   req.traceId = traceId;
   res.setHeader('x-trace-id', traceId);
   next();
