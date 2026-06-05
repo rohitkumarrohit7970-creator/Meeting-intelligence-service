@@ -1,0 +1,10 @@
+import { Router } from 'express';
+import * as actionItemController from '../controllers/actionItemController.js';
+import { authMiddleware } from '../middleware/authMiddleware.js';
+const router = Router();
+router.use(authMiddleware);
+router.post('/', actionItemController.createActionItem);
+router.patch('/:id/status', actionItemController.updateStatus);
+router.get('/', actionItemController.getActionItems);
+router.get('/overdue', actionItemController.getOverdueActionItems);
+export default router;

@@ -1,0 +1,56 @@
+import * as actionItemService from '../services/actionItemService.js';
+import { z } from 'zod';
+const createActionItemSchema = z.object({
+    meetingId: z.string().uuid(),
+    task: z.string().min(1),
+    assignee: z.string().min(1),
+    dueDate: z.string().datetime().optional(),
+    citations: z.array(z.any()).optional(),
+});
+const updateStatusSchema = z.object({
+    status: z.enum(['PENDING', 'IN_PROGRESS', 'COMPLETED']),
+});
+export const createActionItem = async (req, res, next) => {
+    try {
+        const validatedData = createActionItemSchema.parse(req.body);
+        const result = await actionItemService.createActionItem(validatedData);
+        res.status(201).json(result);
+    }
+    catch (error) {
+        next(error);
+    }
+};
+export const updateStatus = async (req, res, next) => {
+    try {
+        const id = req.params['id'];
+        const validatedData = updateStatusSchema.parse(req.body);
+        const result = await actionItemService.updateStatus(id, validatedData.status);
+        res.status(200).json(result);
+    }
+    catch (error) {
+        next(error);
+    }
+};
+export const getActionItems = async (req, res, next) => {
+    try {
+        const filters = {
+            status: req.query.status,
+            assignee: req.query.assignee,
+            meetingId: req.query.meetingId,
+        };
+        const result = await actionItemService.getActionItems(filters);
+        res.status(200).json(result);
+    }
+    catch (error) {
+        next(error);
+    }
+};
+export const getOverdueActionItems = async (req, res, next) => {
+    try {
+        const result = await actionItemService.getOverdueActionItems();
+        res.status(200).json(result);
+    }
+    catch (error) {
+        next(error);
+    }
+};

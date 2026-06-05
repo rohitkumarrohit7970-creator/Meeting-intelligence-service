@@ -1,0 +1,74 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  meetings  Meeting[]
+}
+
+model Meeting {
+  id           String       @id @default(uuid())
+  title        String
+  participants String       // Stored as JSON string or comma-separated
+  meetingDate  DateTime
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  userId       String
+  user         User         @relation(fields: [userId], references: [id])
+  transcripts  Transcript[]
+  analysis     Analysis?
+  actionItems  ActionItem[]
+}
+
+model Transcript {
+  id        String   @id @default(uuid())
+  timestamp String
+  speaker   String
+  text      String
+  meetingId String
+  meeting   Meeting  @relation(fields: [meetingId], references: [id])
+}
+
+model Analysis {
+  id                  String   @id @default(uuid())
+  summary             String   // Stored as JSON string
+  decisions           String?  // Stored as JSON string
+  followUpSuggestions String?  // Stored as JSON string
+  meetingId           String   @unique
+  meeting             Meeting  @relation(fields: [meetingId], references: [id])
+}
+
+model ActionItem {
+  id          String   @id @default(uuid())
+  task        String
+  assignee    String
+  status      String   @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED
+  dueDate     DateTime?
+  citations   String?  // Stored as JSON string
+  meetingId   String
+  meeting     Meeting  @relation(fields: [meetingId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ReminderHistory {
+  id           String   @id @default(uuid())
+  actionItemId String
+  sentAt       DateTime @default(now())
+  status       String   // SUCCESS, FAILED
+  error        String?
+}
